@@ -5,6 +5,15 @@ export enum NodeStatus {
   COMPLETED = 'COMPLETED',
 }
 
+export type GraphMode = 'linear' | 'mindmap';
+export type UserLevel = 'beginner' | 'intermediate' | 'expert';
+
+export interface KnowledgeNodeExample {
+  title: string;
+  content: string;
+  type: 'code' | 'scenario';
+}
+
 export interface KnowledgeNode {
   id: string;
   label: string;
@@ -12,6 +21,8 @@ export interface KnowledgeNode {
   status: NodeStatus;
   stars: number;
   dependencies: string[];
+  parentId?: string;
+  examples?: KnowledgeNodeExample[]; // 新增：实战举例
 }
 
 export interface QuizQuestion {
@@ -22,16 +33,12 @@ export interface QuizQuestion {
   explanation: string;
 }
 
-export interface GraphData {
-  topic: string;
-  nodes: KnowledgeNode[];
-}
-
 export interface HistoryItem {
   id: string;
   topic: string;
   nodes: KnowledgeNode[];
   lastAccessed: number;
+  mode: GraphMode;
 }
 
 export type LLMProvider = 'gemini' | 'openai' | 'ollama' | 'deepseek' | 'lmstudio';
@@ -42,8 +49,7 @@ export interface LLMConfig {
   apiKey?: string;
   model: string;
   temperature: number;
-}
-
-export interface UserProgress {
-  completedNodes: Record<string, { stars: number }>;
+  userLevel: UserLevel;
+  soundEnabled: boolean;
+  theme: 'light' | 'dark';
 }
