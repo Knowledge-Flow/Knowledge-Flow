@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { QuizQuestion, KnowledgeNode } from '../types';
-import { ArrowLeft, ArrowRight, CheckCircle, XCircle, ChevronRight, Trophy } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, ChevronRight, Trophy } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 
 interface QuizModuleProps {

@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { KnowledgeNode } from '../types';
 import { X, Lightbulb, Play, Code, BookOpen, Edit3, Save, RotateCcw } from 'lucide-react';
-import MarkdownRenderer from './MarkdownRenderer';
 
 interface NodeDetailModalProps {
   node: KnowledgeNode;

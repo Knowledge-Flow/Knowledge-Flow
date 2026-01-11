@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 
 interface MarkdownRendererProps {
   content: string;

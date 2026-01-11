@@ -1,7 +1,6 @@
-
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { KnowledgeNode, NodeStatus, GraphMode } from '../types';
-import { Star, CheckCircle2, Play, GitBranch, ListOrdered, Maximize, Move, ZoomIn, MousePointer2, Layout } from 'lucide-react';
+import { Star, CheckCircle2, Play, ListOrdered, Maximize, Move, ZoomIn, MousePointer2, Layout } from 'lucide-react';
 
 interface KnowledgeGraphProps {
   topic: string;
@@ -96,7 +95,6 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ topic, nodes, onNodeCli
     // 2. Assign coordinates (Pre-order traversal)
     const assignCoords = (id: string, x: number, yStart: number) => {
       const children = hierarchy[id] || [];
-      const height = subtreeHeights[id];
       
       // Determine Y for current node
       let myY: number;
@@ -384,7 +382,7 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ topic, nodes, onNodeCli
           <div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">{topic || "未命名主题"}</h2>
             <div className="flex items-center gap-3 mt-1">
-              <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest ${isMindmap ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'}`}>
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-blue-100 text-blue-700">
                 {isMindmap ? '思维导图模式' : '闯关路径模式'}
               </span>
               <div className="h-3 w-px bg-gray-200" />
