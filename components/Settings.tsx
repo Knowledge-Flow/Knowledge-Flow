@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { LLMConfig, LLMProvider, UserLevel } from '../types';
-import { Settings as SettingsIcon, X, Info, Moon, Sun, Volume2, VolumeX, GraduationCap, Cpu } from 'lucide-react';
+import { Settings as SettingsIcon, X, Moon, Sun, Volume2, VolumeX, GraduationCap, Globe } from 'lucide-react';
 
 interface SettingsProps {
   config: LLMConfig;
@@ -17,23 +17,13 @@ const Settings: React.FC<SettingsProps> = ({ config, onUpdate, onClose }) => {
   ];
 
   const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newProvider = e.target.value as LLMProvider;
-    let newModel = config.model;
+    const provider = e.target.value as LLMProvider;
+    let model = config.model;
+    if (provider === 'deepseek') model = 'deepseek-chat';
+    else if (provider === 'openai') model = 'gpt-4o';
+    else if (provider === 'gemini') model = 'gemini-3-pro-preview';
     
-    // Auto-switch default model based on provider
-    if (newProvider === 'deepseek') {
-      newModel = 'deepseek-chat';
-    } else if (newProvider === 'openai') {
-      newModel = 'gpt-4o';
-    } else if (newProvider === 'gemini') {
-      newModel = 'gemini-3-pro-preview';
-    }
-
-    onUpdate({ 
-      ...config, 
-      provider: newProvider, 
-      model: newModel 
-    });
+    onUpdate({ ...config, provider, model, baseUrl: '' });
   };
 
   return (
@@ -48,127 +38,93 @@ const Settings: React.FC<SettingsProps> = ({ config, onUpdate, onClose }) => {
             <X size={20} />
           </button>
         </div>
-        
-        <div className="p-6 space-y-6 overflow-y-auto">
-          {/* 用户等级 */}
-          <div className="space-y-3">
-            <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-              <GraduationCap size={14} /> 学习等级
-            </label>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Provider Selection */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest">
+              <Globe size={14} /> AI 引擎服务商
+            </div>
+            <select 
+              value={config.provider}
+              onChange={handleProviderChange}
+              className={`w-full p-4 rounded-2xl border-2 outline-none transition-all focus:border-blue-500 ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-gray-900'}`}
+            >
+              <option value="gemini">Google Gemini (推荐)</option>
+              <option value="openai">OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+            </select>
+          </section>
+
+          {/* Model Selection */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest">
+               模型名称
+            </div>
+            <input 
+              type="text"
+              value={config.model}
+              onChange={(e) => onUpdate({ ...config, model: e.target.value })}
+              className={`w-full p-4 rounded-2xl border-2 outline-none transition-all focus:border-blue-500 ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-gray-900'}`}
+              placeholder="例如: gemini-3-pro-preview"
+            />
+          </section>
+
+          {/* User Level */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest">
+              <GraduationCap size={14} /> 学习难度
+            </div>
             <div className="grid grid-cols-1 gap-2">
-              {levels.map((l) => (
+              {levels.map((level) => (
                 <button
-                  key={l.value}
-                  onClick={() => onUpdate({ ...config, userLevel: l.value })}
-                  className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                    config.userLevel === l.value 
-                      ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/5' 
-                      : 'border-transparent bg-gray-100/50 hover:bg-gray-100'
-                  }`}
+                  key={level.value}
+                  onClick={() => onUpdate({ ...config, userLevel: level.value })}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all ${config.userLevel === level.value ? 'border-blue-500 bg-blue-50/10' : 'border-transparent hover:bg-gray-100/10'}`}
                 >
-                  <div className="font-bold">{l.label}</div>
-                  <div className="text-xs opacity-60">{l.desc}</div>
+                  <div className="font-bold">{level.label}</div>
+                  <div className="text-xs opacity-60">{level.desc}</div>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* 交互开关 */}
-          <div className="flex gap-4">
-            <button 
-              onClick={() => onUpdate({ ...config, theme: config.theme === 'light' ? 'dark' : 'light' })}
-              className={`flex-1 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold border-2 transition-all ${config.theme === 'dark' ? 'border-blue-500 bg-blue-500/10' : 'border-gray-100 bg-gray-50'}`}
-            >
-              {config.theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
-              {config.theme === 'dark' ? '暗黑模式' : '明亮模式'}
-            </button>
-            <button 
-              onClick={() => onUpdate({ ...config, soundEnabled: !config.soundEnabled })}
-              className={`flex-1 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold border-2 transition-all ${config.soundEnabled ? 'border-green-500 bg-green-500/10' : 'border-gray-100 bg-gray-50'}`}
-            >
-              {config.soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-              音效{config.soundEnabled ? '已开' : '已关'}
-            </button>
-          </div>
-
-          <hr className="opacity-10" />
-
-          {/* AI 引擎设置 */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <Cpu size={14} /> 模型服务提供商
-              </label>
-              <select 
-                value={config.provider}
-                onChange={handleProviderChange}
-                className={`w-full p-3 border-2 rounded-xl outline-none transition-all font-medium ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'}`}
+          {/* Appearance & Sound */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest">
+              偏好设置
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => onUpdate({ ...config, theme: config.theme === 'dark' ? 'light' : 'dark' })}
+                className={`flex-1 p-4 rounded-2xl border-2 flex items-center justify-center gap-2 transition-all ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'}`}
               >
-                <option value="gemini">Google Gemini (内置)</option>
-                <option value="deepseek">DeepSeek (深度求索)</option>
-                <option value="openai">OpenAI (ChatGPT)</option>
-                <option value="ollama">Ollama (本地)</option>
-              </select>
+                {config.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                <span className="font-bold">{config.theme === 'dark' ? '浅色模式' : '深色模式'}</span>
+              </button>
+              <button 
+                onClick={() => onUpdate({ ...config, soundEnabled: !config.soundEnabled })}
+                className={`flex-1 p-4 rounded-2xl border-2 flex items-center justify-center gap-2 transition-all ${config.soundEnabled ? 'bg-blue-50/10 border-blue-500 text-blue-500' : 'bg-gray-50 border-gray-100'}`}
+              >
+                {config.soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                <span className="font-bold">音效</span>
+              </button>
             </div>
+          </section>
+        </div>
 
-            {/* 模型名称输入 (所有模式下均可修改) */}
-            <div className="space-y-2">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Model Name</label>
-              <input 
-                type="text"
-                value={config.model || ''}
-                onChange={(e) => onUpdate({ ...config, model: e.target.value })}
-                className={`w-full p-3 border-2 rounded-xl outline-none transition-all ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'}`}
-                placeholder="例如: deepseek-chat, gpt-4o"
-              />
-              <p className="text-[10px] opacity-50 px-1">
-                {config.provider === 'deepseek' && '推荐: deepseek-chat (V3) 或 deepseek-reasoner (R1)'}
-                {config.provider === 'openai' && '推荐: gpt-4o 或 gpt-3.5-turbo'}
-                {config.provider === 'gemini' && '推荐: gemini-3-pro-preview'}
-              </p>
-            </div>
-
-            {/* API Key */}
-            {config.provider !== 'gemini' && config.provider !== 'ollama' && (
-              <div className="space-y-2">
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest">API Key</label>
-                <input 
-                  type="password"
-                  value={config.apiKey || ''}
-                  onChange={(e) => onUpdate({ ...config, apiKey: e.target.value })}
-                  className={`w-full p-3 border-2 rounded-xl outline-none transition-all ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'}`}
-                  placeholder={config.provider === 'deepseek' ? "ds-..." : "sk-..."}
-                />
-              </div>
-            )}
-
-            {/* Base URL (Optional) */}
-            {config.provider !== 'gemini' && (
-               <div className="space-y-2">
-               <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Base URL (可选)</label>
-               <input 
-                 type="text"
-                 value={config.baseUrl || ''}
-                 onChange={(e) => onUpdate({ ...config, baseUrl: e.target.value })}
-                 className={`w-full p-3 border-2 rounded-xl outline-none transition-all ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'}`}
-                 placeholder={config.provider === 'deepseek' ? "https://api.deepseek.com" : "默认地址"}
-               />
-             </div>
-            )}
-          </div>
-
-          <div className="pt-4 shrink-0">
-            <button 
-              onClick={onClose}
-              className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all hover:bg-blue-700"
-            >
-              保存并返回
-            </button>
-          </div>
+        <div className="p-6 border-t border-gray-100/10 shrink-0">
+          <button 
+            onClick={onClose}
+            className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+          >
+            保存并返回
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
+// Add the missing default export
 export default Settings;

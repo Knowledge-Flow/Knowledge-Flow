@@ -41,7 +41,7 @@ export interface HistoryItem {
   mode: GraphMode;
 }
 
-export type LLMProvider = 'gemini' | 'openai' | 'ollama' | 'deepseek' | 'lmstudio';
+export type LLMProvider = 'gemini' | 'openai' | 'deepseek';
 
 export interface LLMConfig {
   provider: LLMProvider;
