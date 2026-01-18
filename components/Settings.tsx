@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { LLMConfig, LLMProvider, UserLevel } from '../types';
-import { Settings as SettingsIcon, X, Moon, Sun, Volume2, VolumeX, GraduationCap, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, X, Moon, Sun, Volume2, VolumeX, GraduationCap, Globe, Key, Link } from 'lucide-react';
 
 interface SettingsProps {
   config: LLMConfig;
@@ -19,12 +19,23 @@ const Settings: React.FC<SettingsProps> = ({ config, onUpdate, onClose }) => {
   const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const provider = e.target.value as LLMProvider;
     let model = config.model;
-    if (provider === 'deepseek') model = 'deepseek-chat';
-    else if (provider === 'openai') model = 'gpt-4o';
-    else if (provider === 'gemini') model = 'gemini-3-pro-preview';
+    let baseUrl = config.baseUrl;
+
+    if (provider === 'deepseek') {
+      model = 'deepseek-chat';
+      baseUrl = 'https://api.deepseek.com/v1';
+    } else if (provider === 'openai') {
+      model = 'gpt-4o';
+      baseUrl = 'https://api.openai.com/v1';
+    } else if (provider === 'gemini') {
+      model = 'gemini-3-pro-preview';
+      baseUrl = '';
+    }
     
-    onUpdate({ ...config, provider, model, baseUrl: '' });
+    onUpdate({ ...config, provider, model, baseUrl });
   };
+
+  const isGemini = config.provider === 'gemini';
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -50,11 +61,38 @@ const Settings: React.FC<SettingsProps> = ({ config, onUpdate, onClose }) => {
               onChange={handleProviderChange}
               className={`w-full p-4 rounded-2xl border-2 outline-none transition-all focus:border-blue-500 ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-gray-900'}`}
             >
-              <option value="gemini">Google Gemini (推荐)</option>
+              <option value="gemini">Google Gemini (默认)</option>
               <option value="openai">OpenAI</option>
               <option value="deepseek">DeepSeek</option>
             </select>
           </section>
+
+          {/* Credentials - Only for non-Gemini providers as per system instructions */}
+          {!isGemini && (
+            <section className="space-y-4 animate-in slide-in-from-top duration-300">
+              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest">
+                <Key size={14} /> API 密钥 (Credentials)
+              </div>
+              <input 
+                type="password"
+                value={config.apiKey || ''}
+                onChange={(e) => onUpdate({ ...config, apiKey: e.target.value })}
+                className={`w-full p-4 rounded-2xl border-2 outline-none transition-all focus:border-blue-500 ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-gray-900'}`}
+                placeholder="输入您的 API Key..."
+              />
+              
+              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest pt-2">
+                <Link size={14} /> 接口地址 (Base URL)
+              </div>
+              <input 
+                type="text"
+                value={config.baseUrl || ''}
+                onChange={(e) => onUpdate({ ...config, baseUrl: e.target.value })}
+                className={`w-full p-4 rounded-2xl border-2 outline-none transition-all focus:border-blue-500 ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-gray-900'}`}
+                placeholder="例如: https://api.deepseek.com/v1"
+              />
+            </section>
+          )}
 
           {/* Model Selection */}
           <section className="space-y-4">
@@ -66,7 +104,7 @@ const Settings: React.FC<SettingsProps> = ({ config, onUpdate, onClose }) => {
               value={config.model}
               onChange={(e) => onUpdate({ ...config, model: e.target.value })}
               className={`w-full p-4 rounded-2xl border-2 outline-none transition-all focus:border-blue-500 ${config.theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-gray-900'}`}
-              placeholder="例如: gemini-3-pro-preview"
+              placeholder="例如: gpt-4o 或 deepseek-chat"
             />
           </section>
 
@@ -126,5 +164,4 @@ const Settings: React.FC<SettingsProps> = ({ config, onUpdate, onClose }) => {
   );
 };
 
-// Add the missing default export
 export default Settings;
